@@ -21,6 +21,12 @@ pipeline {
               sh 'mvn package'
             }
         }
-
+   
+        stage('Deploy') {
+            steps {
+              echo 'Deploying the Application'
+              sh 'mvn clean deploy'
+            }
+        }
     }
 }

@@ -7,7 +7,7 @@ pipeline {
         maven "Maven"
     }
   
-        
+    stages {   
         stage('Test') {
             steps { 
               echo 'Testing the Application'
@@ -21,5 +21,6 @@ pipeline {
               sh 'mvn package'
             }
         }
+
     }
 }

@@ -4,7 +4,12 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 trigger:
-- main
+  branches:
+    include:
+    - master
+    - releases/*
+    exclude:
+    - releases/old*
 
 stages:
 - stage: Build
@@ -26,5 +31,46 @@ stages:
         publishJUnitResults: true
         testResultsFiles: '**/surefire-reports/TEST-*.xml'
         goals: 'package'
+    
+    - task: PublishCodeCoverageResults@1
+      inputs:
+       codeCoverageTool: 'Cinema'
+       summaryFileLocation: 
+       reportDirectory: 
+       failIfCoverageEmpty: true
+
+    - task: CopyFiles@2
+      displayName:
+
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: '**/target/*.?(war|jar)'
+        TargetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'cinema'
+        publishLocation: 'Container'
 
 
+- stage: 'Deploy'
+  displayName: 'Deploy the web application'
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: 'ubuntu-18.04'
+    environment: Virtual Machine
+    variables:
+    - group: Release
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'cinema'
+              downloadPath: '$(System.ArtifactsDirectory)'

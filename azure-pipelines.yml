@@ -27,5 +27,5 @@ stages:
         testResultsFiles: '**/surefire-reports/TEST-*.xml'
         goals: 'package'
     
-//deploy
+//deployment
 

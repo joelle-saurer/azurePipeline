@@ -53,4 +53,24 @@ stages:
         ArtifactName: 'cinema'
         publishLocation: 'Container'
 
+- stage: 'Deploy'
+  displayName: 'Deploy the web application'
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: 'ubuntu-18.04'
+    environment: Virtual Machine
+    variables:
+    - group: Release
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'cinema'
+              downloadPath: '$(System.ArtifactsDirectory)'
 
